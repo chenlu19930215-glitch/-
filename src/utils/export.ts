@@ -2,7 +2,6 @@ import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 
 const DEFAULT_PDF_FILENAME = '包装装载方案报告'
-const DEFAULT_PNG_FILENAME = '包装装载方案截图'
 
 // ---- html2canvas oklch 补丁 -----------------------------------------------
 // html2canvas 1.4.1 不支持 CSS Color Level 4 的 oklch() 函数，
