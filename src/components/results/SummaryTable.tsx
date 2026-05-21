@@ -25,7 +25,7 @@ export default function SummaryTable() {
               <th className="px-3 py-2 text-center">码垛模式</th>
               <th className="px-3 py-2 text-center">排列方式(L×W×H)</th>
               <th className="px-3 py-2 text-center">每箱数量</th>
-              <th className="px-3 py-2 text-center">纸箱外尺寸</th>
+              <th className="px-3 py-2 text-center">纸箱内尺寸</th>
               <th className="px-3 py-2 text-center">每托箱数</th>
               <th className="px-3 py-2 text-center">总产品数</th>
               <th className="px-3 py-2 text-center">体积利用率</th>
@@ -60,7 +60,7 @@ export default function SummaryTable() {
                     {sol.boxing.totalCount}
                   </td>
                   <td className="px-3 py-2 text-center text-gray-900 whitespace-nowrap">
-                    {sol.boxing.outerDim.length}×{sol.boxing.outerDim.width}×{sol.boxing.outerDim.height} mm
+                    {Math.max(sol.boxing.innerDim.length, sol.boxing.innerDim.width)}×{Math.min(sol.boxing.innerDim.length, sol.boxing.innerDim.width)}×{sol.boxing.innerDim.height} mm
                   </td>
                   <td className="px-3 py-2 text-center text-gray-900">
                     {sol.palletizing.totalBoxes}
