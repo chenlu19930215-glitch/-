@@ -9,29 +9,24 @@ import type { CartonDim, BoxConstraint } from '../types'
 // ---- generateOrientations ------------------------------------
 
 describe('generateOrientations', () => {
-  it('returns exactly 6 permutations for a generic carton', () => {
+  it('returns exactly 2 standing permutations for a generic carton', () => {
     const carton: CartonDim = { length: 10, width: 20, height: 30 }
     const result = generateOrientations(carton)
-    expect(result).toHaveLength(6)
+    expect(result).toHaveLength(2)
 
-    // Every orientation has the expected shape
+    // Every orientation has the expected shape (only standing: height stays at h)
     const tuples = result.map((o) => `${o.l},${o.w},${o.h}`)
-    expect(new Set(tuples).size).toBe(6)
+    expect(new Set(tuples).size).toBe(2)
 
-    // Verify all 6 permutations are present
+    // Verify only the 2 standing permutations are present (height=30 always at h)
     expect(tuples).toContain('10,20,30')
-    expect(tuples).toContain('10,30,20')
     expect(tuples).toContain('20,10,30')
-    expect(tuples).toContain('20,30,10')
-    expect(tuples).toContain('30,10,20')
-    expect(tuples).toContain('30,20,10')
   })
 
   it('handles a cube (all dimensions equal)', () => {
     const carton: CartonDim = { length: 50, width: 50, height: 50 }
     const result = generateOrientations(carton)
-    expect(result).toHaveLength(6)
-    // All tuples are identical but each Orientation is a distinct object
+    expect(result).toHaveLength(2)
     for (const o of result) {
       expect(o.l).toBe(50)
       expect(o.w).toBe(50)
@@ -42,10 +37,10 @@ describe('generateOrientations', () => {
   it('handles extreme aspect ratios', () => {
     const carton: CartonDim = { length: 1, width: 100, height: 500 }
     const result = generateOrientations(carton)
-    expect(result).toHaveLength(6)
+    expect(result).toHaveLength(2)
     const tuples = result.map((o) => `${o.l},${o.w},${o.h}`)
-    expect(tuples).toContain('1,500,100')
-    expect(tuples).toContain('500,100,1')
+    expect(tuples).toContain('1,100,500')
+    expect(tuples).toContain('100,1,500')
   })
 
   it('each orientation has a non-empty label', () => {
@@ -226,7 +221,7 @@ describe('findOptimalBoxing', () => {
       clearanceW: 2,
       clearanceH: 2,
     }
-    const results = findOptimalBoxing(carton, lightConstraint)
+    const results = findOptimalBoxing(carton, lightConstraint, { singleCartonWeightKg: 0.5 })
 
     for (const sol of results) {
       expect(sol.grossWeight).toBeLessThanOrEqual(3)

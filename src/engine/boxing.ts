@@ -41,12 +41,8 @@ export function generateOrientations(carton: CartonDim): Orientation[] {
   const { length, width, height } = carton
 
   const permutations: Array<{ dims: [number, number, number]; label: string }> = [
-    { dims: [length, width, height], label: 'L×W×H (original)' },
-    { dims: [length, height, width], label: 'L×H×W' },
+    { dims: [length, width, height], label: 'L×W×H (原始)' },
     { dims: [width, length, height], label: 'W×L×H' },
-    { dims: [width, height, length], label: 'W×H×L' },
-    { dims: [height, length, width], label: 'H×L×W' },
-    { dims: [height, width, length], label: 'H×W×L' },
   ]
 
   return permutations.map(({ dims: [l, w, h], label }) => ({ l, w, h, label }))
