@@ -22,7 +22,7 @@ export interface BoxingOptions {
 
 // ---- Constants -----------------------------------------------
 
-const DEFAULT_SINGLE_CARTON_WEIGHT_KG = 0.5
+const DEFAULT_SINGLE_CARTON_WEIGHT_KG = 0.3
 const MAX_COUNT_PER_DIM = 15
 const MAX_CARTON_LAYERS_HEIGHT = 2
 

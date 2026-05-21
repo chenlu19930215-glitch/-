@@ -49,7 +49,9 @@ export function runFullOptimization(
   // ---- Step 1: 获取所有装箱方案并去重 --------------------------
 
   const boxingSolutions = deduplicateSolutions(
-    findOptimalBoxing(input.carton, input.boxConstraint),
+    findOptimalBoxing(input.carton, input.boxConstraint, {
+      singleCartonWeightKg: input.carton.grossWeight,
+    }),
   )
   if (boxingSolutions.length === 0) return []
 
