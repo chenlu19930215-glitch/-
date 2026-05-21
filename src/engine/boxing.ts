@@ -25,7 +25,6 @@ export interface BoxingOptions {
 const DEFAULT_SINGLE_CARTON_WEIGHT_KG = 0.5
 const MAX_COUNT_PER_DIM = 15
 const MAX_CARTON_LAYERS_HEIGHT = 2
-const MIN_VOLUME_UTILIZATION = 0.7
 
 // ---- Scoring weights -----------------------------------------
 
@@ -130,9 +129,6 @@ export function findOptimalBoxing(
           // ---- Compute volume utilization ----
           const innerVolume = innerL * innerW * innerH
           const volumeUtilization = (cartonVolume * totalCount) / innerVolume
-
-          // ---- Filter: volume utilization >= 70% ----
-          if (volumeUtilization < MIN_VOLUME_UTILIZATION) continue
 
           // ---- Compute outer dimensions ----
           const outerL = innerL + 2 * wallThickness

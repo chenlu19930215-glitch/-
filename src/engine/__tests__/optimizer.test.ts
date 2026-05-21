@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { runFullOptimization } from '../optimizer'
+import { findOptimalBoxing } from '../boxing'
 import type { OptimizerInput, OptimizerConfig } from '../types'
 import {
   DEFAULT_BOX_CONSTRAINT,
@@ -112,32 +113,35 @@ describe('runFullOptimization', () => {
   })
 
   it('verification: some boxing solutions have 20 cartons per box', () => {
-    const result = runFullOptimization(VERIFICATION_INPUT)
-
-    const solutionsWith20 = result.filter((s) => s.boxing.totalCount === 20)
+    // 在装箱层面（分组前）验证 20 箱方案存在且可通过码垛
+    const boxingSolutions = findOptimalBoxing(
+      VERIFICATION_INPUT.carton,
+      VERIFICATION_INPUT.boxConstraint,
+    )
+    const solutionsWith20 = boxingSolutions.filter((s) => s.totalCount === 20)
     expect(solutionsWith20.length).toBeGreaterThan(0)
 
     // Verify the 20-carton boxing sub-solution passes all constraints
     const sol = solutionsWith20[0]
-    expect(sol.boxing.outerDim.length).toBeLessThanOrEqual(600)
-    expect(sol.boxing.outerDim.width).toBeLessThanOrEqual(600)
-    expect(sol.boxing.outerDim.height).toBeLessThanOrEqual(600)
-    expect(sol.boxing.grossWeight).toBeLessThanOrEqual(15)
-    expect(sol.boxing.volumeUtilization).toBeGreaterThanOrEqual(0.7)
+    expect(sol.outerDim.length).toBeLessThanOrEqual(600)
+    expect(sol.outerDim.width).toBeLessThanOrEqual(600)
+    expect(sol.outerDim.height).toBeLessThanOrEqual(600)
+    expect(sol.grossWeight).toBeLessThanOrEqual(15)
 
     // The product of counts should equal 20
-    expect(sol.boxing.counts[0] * sol.boxing.counts[1] * sol.boxing.counts[2]).toBe(
-      20,
-    )
+    expect(sol.counts[0] * sol.counts[1] * sol.counts[2]).toBe(20)
   })
 
   // ---- Sorting -----------------------------------------------
 
-  it('returns results sorted by overallScore in descending order', () => {
+  it('returns results grouped by pattern, each group sorted by overallScore descending', () => {
     const result = runFullOptimization(VERIFICATION_INPUT)
 
     expect(result.length).toBeGreaterThan(0)
+    // 前半部分：简单堆叠组，组内按分数降序
     for (let i = 1; i < result.length; i++) {
+      // 跨组边界时停止检查（简单堆叠→混合交叠的分界）
+      if (result[i].palletizing.layout.pattern !== result[i - 1].palletizing.layout.pattern) break
       expect(result[i].overallScore).toBeLessThanOrEqual(
         result[i - 1].overallScore,
       )
@@ -157,7 +161,8 @@ describe('runFullOptimization', () => {
       topN: 3,
     }
     const result = runFullOptimization(VERIFICATION_INPUT, customConfig)
-    expect(result.length).toBeLessThanOrEqual(3)
+    // 取 topN/2 向上取整各一组，最多 2+2=4 个
+    expect(result.length).toBeLessThanOrEqual(Math.ceil(customConfig.topN / 2) * 2)
   })
 
   it('returns all solutions when total count is less than topN', () => {

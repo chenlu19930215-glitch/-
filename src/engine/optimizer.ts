@@ -99,8 +99,22 @@ export function runFullOptimization(
       config.regularityWeight * normalizedRegularity
   }
 
-  // ---- Step 5: 排序并取 top N ----------------------------------
+  // ---- Step 5: 按码垛模式分组，各取 top N/2 -----------------------
 
-  combined.sort((a, b) => b.overallScore - a.overallScore)
-  return combined.slice(0, config.topN)
+  const simple: CombinedSolution[] = []
+  const mixed: CombinedSolution[] = []
+
+  for (const solution of combined) {
+    if (solution.palletizing.layout.pattern === 'row-split-alternating') {
+      mixed.push(solution)
+    } else {
+      simple.push(solution)
+    }
+  }
+
+  simple.sort((a, b) => b.overallScore - a.overallScore)
+  mixed.sort((a, b) => b.overallScore - a.overallScore)
+
+  const half = Math.ceil(config.topN / 2)
+  return [...simple.slice(0, half), ...mixed.slice(0, half)]
 }
