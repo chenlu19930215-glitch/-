@@ -33,16 +33,12 @@ export default function DimensionTable() {
               <Row label="纸箱壁厚" value={`${boxConstraint.wallThickness} mm`} />
               <Row label="每箱纸盒数" value={String(sol.boxing.totalCount)} />
               <Row label="纸箱毛重" value={`${sol.boxing.grossWeight.toFixed(1)} kg`} />
-              <Row label="纸箱体积利用率" value={`${(sol.boxing.volumeUtilization * 100).toFixed(1)}%`} />
               <Row label="托盘尺寸" value={`${pallet.length}×${pallet.width}×${pallet.height} mm`} />
               <Row label="每层箱数" value={String(sol.palletizing.layout.boxesPerLayer)} />
               <Row label="堆叠层数" value={String(sol.palletizing.layout.layers)} />
               <Row label="每托总箱数" value={String(sol.palletizing.totalBoxes)} />
               <Row label="托盘面积利用率" value={`${(sol.palletizing.layout.areaUtilization * 100).toFixed(1)}%`} />
-              <Row label="托盘体积利用率" value={`${(sol.palletizing.volumeUtilization * 100).toFixed(1)}%`} />
               <Row label="负载总高度" value={`${sol.palletizing.layout.totalHeight.toFixed(1)} mm`} />
-              <Row label="悬垂量(长)" value={`${sol.palletizing.layout.overhangLength.toFixed(1)} mm`} />
-              <Row label="悬垂量(宽)" value={`${sol.palletizing.layout.overhangWidth.toFixed(1)} mm`} />
             </tbody>
           </table>
         </div>

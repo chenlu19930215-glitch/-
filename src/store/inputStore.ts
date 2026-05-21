@@ -14,11 +14,15 @@ interface InputState {
   boxConstraint: BoxConstraint
   pallet: PalletDim
   palletConstraint: PalletConstraint
+  customerName: string
+  productName: string
 
   setCarton: (carton: Partial<CartonDim>) => void
   setBoxConstraint: (c: Partial<BoxConstraint>) => void
   setPallet: (pallet: Partial<PalletDim>) => void
   setPalletConstraint: (c: Partial<PalletConstraint>) => void
+  setCustomerName: (name: string) => void
+  setProductName: (name: string) => void
   resetAll: () => void
 }
 
@@ -29,20 +33,21 @@ export const useInputStore = create<InputState>((set) => ({
   boxConstraint: { ...DEFAULT_BOX_CONSTRAINT },
   pallet: { ...DEFAULT_PALLET },
   palletConstraint: { ...DEFAULT_PALLET_CONSTRAINT },
+  customerName: '',
+  productName: '',
 
   setCarton: (partial) =>
     set((state) => ({ carton: { ...state.carton, ...partial } })),
-
   setBoxConstraint: (partial) =>
     set((state) => ({ boxConstraint: { ...state.boxConstraint, ...partial } })),
-
   setPallet: (partial) =>
     set((state) => ({ pallet: { ...state.pallet, ...partial } })),
-
   setPalletConstraint: (partial) =>
     set((state) => ({
       palletConstraint: { ...state.palletConstraint, ...partial },
     })),
+  setCustomerName: (name) => set({ customerName: name }),
+  setProductName: (name) => set({ productName: name }),
 
   resetAll: () =>
     set({
@@ -50,5 +55,7 @@ export const useInputStore = create<InputState>((set) => ({
       boxConstraint: { ...DEFAULT_BOX_CONSTRAINT },
       pallet: { ...DEFAULT_PALLET },
       palletConstraint: { ...DEFAULT_PALLET_CONSTRAINT },
+      customerName: '',
+      productName: '',
     }),
 }))

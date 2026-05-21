@@ -14,6 +14,7 @@ interface ComputeState {
   compute: (input: OptimizerInput, config?: OptimizerConfig) => void
   selectSolution: (index: number) => void
   clearResults: () => void
+  restoreResults: (results: CombinedSolution[], selectedIndex: number) => void
 }
 
 // ---- Store -----------------------------------------------------
@@ -72,4 +73,7 @@ export const useComputeStore = create<ComputeState>((set) => ({
 
   clearResults: () =>
     set({ results: [], selectedIndex: -1, error: null }),
+
+  restoreResults: (results, selectedIndex) =>
+    set({ results, selectedIndex, error: null, isComputing: false }),
 }))

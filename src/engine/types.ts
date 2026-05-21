@@ -102,6 +102,16 @@ export interface LayerLayout {
   totalHeight: number
   /** 是否旋转90度 */
   rotated: boolean
+  /** 排列模式 */
+  pattern?: 'column' | 'row-split' | 'row-split-alternating'
+  /** 行拆分区域A沿托盘长方向箱数 */
+  rowSplitCountA?: number
+  /** 行拆分区域B沿托盘长方向箱数 */
+  rowSplitCountB?: number
+  /** 交替层行拆分区域A沿托盘长方向箱数 */
+  altRowSplitCountA?: number
+  /** 交替层行拆分区域B沿托盘长方向箱数 */
+  altRowSplitCountB?: number
 }
 
 /** 纸箱码垛方案 */
@@ -153,10 +163,10 @@ export interface OptimizerConfig {
 export const DEFAULT_BOX_CONSTRAINT: BoxConstraint = {
   maxOuterDim: 600,
   maxWeight: 15,
-  wallThickness: 5,
-  clearanceL: 2,
-  clearanceW: 2,
-  clearanceH: 2,
+  wallThickness: 6,
+  clearanceL: 10,
+  clearanceW: 10,
+  clearanceH: 5,
 }
 
 export const DEFAULT_PALLET_CONSTRAINT: PalletConstraint = {

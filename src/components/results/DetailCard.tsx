@@ -39,16 +39,6 @@ export default function DetailCard({ solution }: Props) {
   const { boxing, palletizing } = solution
   const od = boxing.outerDim
   const id = boxing.innerDim
-  const boxOd = palletizing.boxOuter
-
-  // 悬垂量
-  const totalLen = palletizing.layout.alongLength * (palletizing.layout.rotated ? boxOd.width : boxOd.length)
-  const totalWid = palletizing.layout.alongWidth * (palletizing.layout.rotated ? boxOd.length : boxOd.width)
-  const overhangL = totalLen - 1200 // using default pallet length — we don't have pallet dims here
-  const overhangW = totalWid - 1000 // using default pallet width
-  // Actually let's just show what the engine reports
-  const ovL = palletizing.layout.overhangLength
-  const ovW = palletizing.layout.overhangWidth
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4">
@@ -69,36 +59,25 @@ export default function DetailCard({ solution }: Props) {
             </thead>
             <tbody>
               <tr className="border-t border-gray-100">
-                <td className="py-1.5 text-gray-600">纸盒(OD)</td>
+                <td className="py-1.5 text-gray-600">纸盒尺寸</td>
                 <td className="py-1.5 text-right">{boxing.orientation.l}</td>
                 <td className="py-1.5 text-right">{boxing.orientation.w}</td>
                 <td className="py-1.5 text-right">{boxing.orientation.h}</td>
                 <td className="py-1.5 text-right">{(boxing.orientation.l * boxing.orientation.w * boxing.orientation.h / 1000).toFixed(1)}cm³</td>
               </tr>
               <tr className="border-t border-gray-100">
-                <td className="py-1.5 text-gray-600">纸箱(ID)</td>
+                <td className="py-1.5 text-gray-600">纸箱内尺寸</td>
                 <td className="py-1.5 text-right">{id.length}</td>
                 <td className="py-1.5 text-right">{id.width}</td>
                 <td className="py-1.5 text-right">{id.height}</td>
                 <td className="py-1.5 text-right">{(id.length * id.width * id.height / 1_000_000).toFixed(1)}L</td>
               </tr>
               <tr className="border-t border-gray-100">
-                <td className="py-1.5 text-gray-600">纸箱(OD)</td>
+                <td className="py-1.5 text-gray-600">纸箱外尺寸</td>
                 <td className="py-1.5 text-right">{od.length}</td>
                 <td className="py-1.5 text-right">{od.width}</td>
                 <td className="py-1.5 text-right">{od.height}</td>
                 <td className="py-1.5 text-right">{(od.length * od.width * od.height / 1_000_000).toFixed(1)}L</td>
-              </tr>
-              <tr className="border-t border-gray-100">
-                <td className="py-1.5 text-gray-600">悬垂量</td>
-                <td className={`py-1.5 text-right ${ovL > 0 ? 'text-orange-500' : 'text-green-600'}`}>
-                  {ovL > 0 ? `+${ovL}` : ovL}
-                </td>
-                <td className={`py-1.5 text-right ${ovW > 0 ? 'text-orange-500' : 'text-green-600'}`}>
-                  {ovW > 0 ? `+${ovW}` : ovW}
-                </td>
-                <td className="py-1.5 text-right text-gray-400">-</td>
-                <td className="py-1.5 text-right text-gray-400">-</td>
               </tr>
             </tbody>
           </table>

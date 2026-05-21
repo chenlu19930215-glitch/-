@@ -3,7 +3,6 @@ import { OrbitControls } from '@react-three/drei'
 import { useMemo } from 'react'
 import type { PalletSolution, PalletDim } from '../../engine/types'
 
-const LAYER_COLORS = ['#6B8C3A', '#3D4A5C']
 const PALLET_COLOR = '#D4B854'
 const PALLET_LEG_COLOR = '#B8963E'
 
@@ -16,17 +15,15 @@ interface BoxPos {
   x: number; y: number; z: number
   boxW: number; boxH: number; boxD: number
   rotY: number
-  color: string
+  region: 'A' | 'B' | 'col'
 }
 
-function computeBoxes(config: {
-  boxOuter: { length: number; width: number; height: number }
-  alongLength: number; alongWidth: number; layers: number; rotated: boolean
-  palletHeight: number
-}): BoxPos[] {
-  const { boxOuter, alongLength, alongWidth, layers, rotated, palletHeight } = config
+function computeColumnPositions(
+  boxOuter: { length: number; width: number; height: number },
+  alongLength: number, alongWidth: number, layers: number,
+  rotated: boolean, palletHeight: number,
+): BoxPos[] {
   const items: BoxPos[] = []
-
   const stepX = rotated ? boxOuter.width : boxOuter.length
   const stepZ = rotated ? boxOuter.length : boxOuter.width
   const totalX = alongLength * stepX
@@ -46,9 +43,66 @@ function computeBoxes(config: {
           boxW: boxOuter.length,
           boxD: boxOuter.width,
           boxH: boxOuter.height,
-          color: LAYER_COLORS[layer % 2],
+          region: 'col',
         })
       }
+    }
+  }
+  return items
+}
+
+function computeRowSplitPositions(
+  boxL: number, boxW: number, boxH: number,
+  layers: number, palletHeight: number,
+  rowSplitCountA: number, rowSplitCountB: number,
+  altCountA?: number, altCountB?: number,
+): BoxPos[] {
+  const items: BoxPos[] = []
+
+  for (let layer = 0; layer < layers; layer++) {
+    const useAlt = altCountA !== undefined && layer % 2 === 1
+    const cntA = useAlt ? altCountA! : rowSplitCountA
+    const cntB = useAlt ? altCountB! : rowSplitCountB
+    const y = palletHeight + layer * boxH + boxH / 2
+
+    // 取两排各自宽度的最大值，以较宽那排为基准两端对齐
+    const spanA = cntA * boxW
+    const spanB = cntB * boxL
+    const maxSpan = Math.max(spanA, spanB)
+    const startX = -maxSpan / 2
+
+    // 交替层做 180° 水平旋转（绕 Y 轴）：Region A/B 前后互换
+    const regionAZ = useAlt ? boxW / 2 : -boxW / 2
+    const regionBZ = useAlt ? -boxL / 2 : boxL / 2
+
+    // Region A: W×L 朝向，不旋转，boxW 沿 x 轴，boxL 沿 z 轴
+    const gapA = cntA > 1 ? (maxSpan - spanA) / (cntA - 1) : 0
+    for (let i = 0; i < cntA; i++) {
+      items.push({
+        x: startX + i * (boxW + gapA) + boxW / 2,
+        y,
+        z: regionAZ,
+        rotY: 0,
+        boxW: boxW,
+        boxD: boxL,
+        boxH,
+        region: 'A',
+      })
+    }
+
+    // Region B: L×W 朝向，不旋转，boxL 沿 x 轴，boxW 沿 z 轴
+    const gapB = cntB > 1 ? (maxSpan - spanB) / (cntB - 1) : 0
+    for (let i = 0; i < cntB; i++) {
+      items.push({
+        x: startX + i * (boxL + gapB) + boxL / 2,
+        y,
+        z: regionBZ,
+        rotY: 0,
+        boxW: boxL,
+        boxD: boxW,
+        boxH,
+        region: 'B',
+      })
     }
   }
   return items
@@ -59,14 +113,23 @@ function PalletScene({ solution, palletDims }: Props) {
   const palletW = palletDims.width
   const palletH = palletDims.height
 
-  const boxes = useMemo(() => computeBoxes({
-    boxOuter: solution.boxOuter,
-    alongLength: solution.layout.alongLength,
-    alongWidth: solution.layout.alongWidth,
-    layers: solution.layout.layers,
-    rotated: solution.layout.rotated,
-    palletHeight: palletH,
-  }), [solution, palletDims])
+  const boxes = useMemo(() => {
+    const { layout, boxOuter } = solution
+    if (layout.pattern === 'row-split' || layout.pattern === 'row-split-alternating') {
+      return computeRowSplitPositions(
+        boxOuter.length, boxOuter.width, boxOuter.height,
+        layout.layers, palletH,
+        layout.rowSplitCountA!, layout.rowSplitCountB!,
+        layout.altRowSplitCountA,
+        layout.altRowSplitCountB,
+      )
+    }
+    return computeColumnPositions(
+      boxOuter,
+      layout.alongLength, layout.alongWidth, layout.layers,
+      layout.rotated, palletH,
+    )
+  }, [solution, palletDims])
 
   return (
     <>
@@ -90,16 +153,25 @@ function PalletScene({ solution, palletDims }: Props) {
         ))
       )}
 
-      {/* 纸箱 */}
-      {boxes.map((b, i) => (
-        <mesh key={i} position={[b.x, b.y, b.z]} rotation={[0, b.rotY, 0]}>
-          <boxGeometry args={[b.boxW * 0.98, b.boxH * 0.98, b.boxD * 0.98]} />
-          <meshLambertMaterial color={b.color} />
-        </mesh>
-      ))}
+      {/* 纸箱 — 颜色跟随朝向：绿色始终标示纸箱长度方向 */}
+      {boxes.map((b, i) => {
+        // Region A: W×L 朝向 (boxW 沿 x = 宽度, boxL 沿 z = 长度 → x面灰, z面绿)
+        // Region B/col: L×W 朝向 (boxL 沿 x = 长度, boxW 沿 z = 宽度 → x面绿, z面灰)
+        const faceColors = b.region === 'A'
+          ? ['#9CA3AF', '#9CA3AF', '#F5F5F5', '#F5F5F5', '#6BBF59', '#6BBF59']
+          : ['#6BBF59', '#6BBF59', '#F5F5F5', '#F5F5F5', '#9CA3AF', '#9CA3AF']
+        return (
+          <mesh key={i} position={[b.x, b.y, b.z]} rotation={[0, b.rotY, 0]}>
+            <boxGeometry args={[b.boxW * 0.98, b.boxH * 0.98, b.boxD * 0.98]} />
+            {faceColors.map((c, mi) => (
+              <meshLambertMaterial key={mi} attach={`material-${mi}`} color={c} />
+            ))}
+          </mesh>
+        )
+      })}
 
       <OrbitControls enablePan enableZoom enableRotate />
-      <gridHelper args={[Math.max(palletL, palletW) * 0.004, 20, '#CCC', '#CCC']} position={[0, 0, 0]} />
+      <gridHelper args={[Math.max(palletL, palletW) * 1.5, 20, '#CCC', '#CCC']} position={[0, 0, 0]} />
     </>
   )
 }
@@ -110,7 +182,7 @@ export default function PalletView3D({ solution, palletDims }: Props) {
 
   return (
     <div className="w-full overflow-hidden rounded border border-gray-200 bg-gray-50" style={{ height: 400 }}>
-      <Canvas camera={{ position: [camDist * 0.8, camDist * 0.6, camDist * 0.8], fov: 40 }}>
+      <Canvas gl={{ preserveDrawingBuffer: true }} camera={{ position: [camDist * 0.8, camDist * 0.6, camDist * 0.8], fov: 40, far: 10000 }}>
         <PalletScene solution={solution} palletDims={palletDims} />
       </Canvas>
       <p className="py-1 text-center text-xs text-gray-400">
