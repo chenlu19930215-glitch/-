@@ -7,8 +7,6 @@ export interface CartonDim {
   length: number
   width: number
   height: number
-  /** 净重 (kg)，可选的 */
-  netWeight?: number
   /** 毛重 (kg)，可选的 */
   grossWeight?: number
 }

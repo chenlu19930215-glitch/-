@@ -64,7 +64,10 @@ export function runFullOptimization(
       boxing.outerDim,
       input.pallet,
       input.palletConstraint,
-      { productsPerBox: boxing.totalCount },
+      {
+        productsPerBox: boxing.totalCount,
+        singleBoxWeightKg: boxing.grossWeight,
+      },
     )
 
     if (palletSolutions.length === 0) continue

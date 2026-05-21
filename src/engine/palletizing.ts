@@ -93,6 +93,8 @@ function tryAlternatingRowSplitPattern(
       pattern: 'row-split-alternating',
       rowSplitCountA: cntA,
       rowSplitCountB: cntB,
+      altRowSplitCountA: cntA,
+      altRowSplitCountB: cntB,
     },
     totalBoxes,
     totalProducts,
