@@ -27,6 +27,8 @@ export interface BoxConstraint {
   clearanceW: number
   /** 高度方向余量，默认 2mm */
   clearanceH: number
+  /** 用户指定每箱纸盒数量（不指定则自动计算） */
+  userBoxCount?: number
 }
 
 /** 托盘尺寸 */

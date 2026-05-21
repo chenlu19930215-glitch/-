@@ -4,6 +4,7 @@ import { useInputStore } from '../../store/inputStore'
 export default function ConstraintInput() {
   const { boxConstraint, setBoxConstraint } = useInputStore()
   const [showClearance, setShowClearance] = useState(false)
+  const [showUserCount, setShowUserCount] = useState(false)
 
   return (
     <section>
@@ -41,7 +42,7 @@ export default function ConstraintInput() {
         </div>
         <div className="flex items-center gap-3">
           <label className="w-24 text-sm font-medium text-gray-700">
-            壁厚 (mm)
+            纸箱厚度 (mm)
           </label>
           <input
             type="number"
@@ -112,6 +113,40 @@ export default function ConstraintInput() {
                   className="min-w-0 flex-1 rounded border border-gray-300 px-3 py-1.5 text-right text-sm"
                 />
               </div>
+            </div>
+          )}
+        </div>
+        {/* 用户指定装箱数量 — 可折叠 */}
+        <div className="border-t border-gray-100 pt-2">
+          <button
+            type="button"
+            onClick={() => setShowUserCount(!showUserCount)}
+            className="flex w-full items-center justify-between text-xs font-medium text-gray-500 hover:text-gray-700"
+          >
+            指定每箱数量（可选）
+            <span className="ml-1">{showUserCount ? '▲' : '▼'}</span>
+          </button>
+          {showUserCount && (
+            <div className="mt-2">
+              <div className="flex items-center gap-3">
+                <label className="w-24 text-sm font-medium text-gray-500">
+                  每箱纸盒数
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  value={boxConstraint.userBoxCount ?? ''}
+                  placeholder="留空则自动计算"
+                  onChange={(e) =>
+                    setBoxConstraint({ userBoxCount: e.target.value ? Number(e.target.value) : undefined })
+                  }
+                  className="min-w-0 flex-1 rounded border border-gray-300 px-3 py-1.5 text-right text-sm"
+                />
+              </div>
+              <p className="mt-1 text-[11px] text-gray-400 leading-tight">
+                填写后程序将只输出该数量的装箱方案，留空则按规则自动优化。
+              </p>
             </div>
           )}
         </div>

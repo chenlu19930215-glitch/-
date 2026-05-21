@@ -74,12 +74,34 @@ export async function exportToPdf(
   }
 
   try {
+    // 先捕获 WebGL 画布内容（html2canvas 无法直接读取 WebGL 缓冲区）
+    const canvasSnapshots: string[] = []
+    element.querySelectorAll('canvas').forEach((canvas) => {
+      try {
+        canvasSnapshots.push(canvas.toDataURL('image/png'))
+      } catch {
+        canvasSnapshots.push('')
+      }
+    })
+
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       onclone: (_clonedDoc) => {
         patchOklchColors(_clonedDoc)
+
+        // 将 WebGL canvas 替换为静态截图
+        const canvases = _clonedDoc.querySelectorAll('canvas')
+        canvases.forEach((cvs, i) => {
+          if (canvasSnapshots[i]) {
+            const img = _clonedDoc.createElement('img')
+            img.src = canvasSnapshots[i]
+            img.style.width = cvs.style.width || '400px'
+            img.style.height = cvs.style.height || '400px'
+            cvs.parentNode?.replaceChild(img, cvs)
+          }
+        })
       },
     })
 

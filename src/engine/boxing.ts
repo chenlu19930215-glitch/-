@@ -24,6 +24,7 @@ export interface BoxingOptions {
 
 const DEFAULT_SINGLE_CARTON_WEIGHT_KG = 0.5
 const MAX_COUNT_PER_DIM = 15
+const MAX_CARTON_LAYERS_HEIGHT = 2
 const MIN_VOLUME_UTILIZATION = 0.7
 
 // ---- Scoring weights -----------------------------------------
@@ -107,10 +108,14 @@ export function findOptimalBoxing(
         const maxNHFromWeight = Math.floor(
           maxWeight / (nl * nw * singleCartonWeightKg),
         )
-        const nhLimit = Math.min(maxH, maxNHFromWeight)
+        const nhLimit = Math.min(maxH, maxNHFromWeight, MAX_CARTON_LAYERS_HEIGHT)
 
         for (let nh = 1; nh <= nhLimit; nh++) {
           const totalCount = nl * nw * nh
+
+          // 用户指定数量模式：只接受精确匹配
+          if (constraint.userBoxCount && totalCount !== constraint.userBoxCount) continue
+
           const grossWeight = totalCount * singleCartonWeightKg
 
           // ---- Filter: weight ----

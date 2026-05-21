@@ -15,7 +15,7 @@ interface BoxPos {
   x: number; y: number; z: number
   boxW: number; boxH: number; boxD: number
   rotY: number
-  region: 'A' | 'B' | 'col'
+  region: 'A' | 'B'
 }
 
 function computeColumnPositions(
@@ -43,7 +43,7 @@ function computeColumnPositions(
           boxW: boxOuter.length,
           boxD: boxOuter.width,
           boxH: boxOuter.height,
-          region: 'col',
+          region: rotated ? 'A' : 'B',
         })
       }
     }
@@ -153,13 +153,13 @@ function PalletScene({ solution, palletDims }: Props) {
         ))
       )}
 
-      {/* 纸箱 — 颜色跟随朝向：绿色始终标示纸箱长度方向 */}
+      {/* 纸箱 — 颜色区分朝向：绿色=纸箱长度方向，灰色=纸箱宽度方向 */}
       {boxes.map((b, i) => {
-        // Region A: W×L 朝向 (boxW 沿 x = 宽度, boxL 沿 z = 长度 → x面灰, z面绿)
-        // Region B/col: L×W 朝向 (boxL 沿 x = 长度, boxW 沿 z = 宽度 → x面绿, z面灰)
+        // Region A: W×L 朝向 (boxW 沿 x, boxL 沿 z → x面灰, z面绿)
+        // Region B/col: L×W 朝向 (boxL 沿 x, boxW 沿 z → x面绿, z面灰)
         const faceColors = b.region === 'A'
-          ? ['#9CA3AF', '#9CA3AF', '#F5F5F5', '#F5F5F5', '#6BBF59', '#6BBF59']
-          : ['#6BBF59', '#6BBF59', '#F5F5F5', '#F5F5F5', '#9CA3AF', '#9CA3AF']
+          ? ['#93C5FD', '#93C5FD', '#FFFFFF', '#FFFFFF', '#22C55E', '#22C55E']
+          : ['#22C55E', '#22C55E', '#FFFFFF', '#FFFFFF', '#93C5FD', '#93C5FD']
         return (
           <mesh key={i} position={[b.x, b.y, b.z]} rotation={[0, b.rotY, 0]}>
             <boxGeometry args={[b.boxW * 0.98, b.boxH * 0.98, b.boxD * 0.98]} />

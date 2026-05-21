@@ -3,7 +3,7 @@ import { OrbitControls, Text } from '@react-three/drei'
 import { useMemo } from 'react'
 import type { BoxingSolution } from '../../engine/types'
 
-const CARTON_COLORS = ['#E8567A', '#4A9FD4', '#6BBF59', '#F5A623']
+const CARTON_FACE_COLORS = ['#3B82F6', '#3B82F6', '#FFFFFF', '#FFFFFF', '#EF4444', '#EF4444']
 const BOX_WALL_COLOR = '#C8B48A'
 
 interface Props {
@@ -31,7 +31,6 @@ function CartonScene({ solution }: { solution: BoxingSolution }) {
               (h + 0.5) * cartonH - (counts[2] * cartonH) / 2,
               (w + 0.5) * cartonW - (counts[1] * cartonW) / 2,
             ] as [number, number, number],
-            color: CARTON_COLORS[h % CARTON_COLORS.length],
             size: [cartonL * 0.97, cartonH * 0.97, cartonW * 0.97] as [number, number, number],
           })
         }
@@ -49,7 +48,9 @@ function CartonScene({ solution }: { solution: BoxingSolution }) {
       {cartons.map((c, i) => (
         <mesh key={i} position={c.position}>
           <boxGeometry args={c.size} />
-          <meshLambertMaterial color={c.color} />
+          {CARTON_FACE_COLORS.map((color, mi) => (
+            <meshLambertMaterial key={mi} attach={`material-${mi}`} color={color} />
+          ))}
         </mesh>
       ))}
 
@@ -83,7 +84,7 @@ export default function CartonView3D({ solution }: Props) {
 
   return (
     <div className="w-full overflow-hidden rounded border border-gray-200 bg-gray-50" style={{ height: 360 }}>
-      <Canvas camera={{ position: [camDist * 0.7, camDist * 0.5, camDist * 0.7], fov: 40 }}>
+      <Canvas gl={{ preserveDrawingBuffer: true }} camera={{ position: [camDist * 0.7, camDist * 0.5, camDist * 0.7], fov: 40 }}>
         <CartonScene solution={solution} />
       </Canvas>
       <p className="py-1 text-center text-xs text-gray-400">
