@@ -29,9 +29,9 @@ const MIN_VOLUME_UTILIZATION = 0.7
 
 // ---- Scoring weights -----------------------------------------
 
-const SCORE_WEIGHT_VOLUME = 0.5
-const SCORE_WEIGHT_REGULARITY = 0.3
-const SCORE_WEIGHT_WEIGHT = 0.2
+const SCORE_WEIGHT_VOLUME = 0.4
+const SCORE_WEIGHT_REGULARITY = 0.2
+const SCORE_WEIGHT_WEIGHT = 0.4
 
 // ---- Step 1: Orientation generation ---------------------------
 
@@ -140,12 +140,13 @@ export function findOptimalBoxing(
           const outerH = innerH + 2 * wallThickness
 
           // ---- Score ----
-          const dims = [outerL, outerW, outerH]
-          const maxD = Math.max(...dims)
-          const minD = Math.min(...dims)
-          const regularity = maxD > 0 ? 1 - (maxD - minD) / maxD : 0
+          // 规整度：仅看水平两维（长、宽），短边/长边，1:1 为最佳
+          const regularity = Math.max(outerL, outerW) > 0
+            ? Math.min(outerL, outerW) / Math.max(outerL, outerW)
+            : 0
 
-          const weightScore = maxWeight > 0 ? 1 - grossWeight / maxWeight : 0
+          // 重量评分：越重越高分（纸箱装得更满），不超过上限
+          const weightScore = maxWeight > 0 ? grossWeight / maxWeight : 0
 
           const score =
             SCORE_WEIGHT_VOLUME * volumeUtilization +
